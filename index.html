@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,intial-scale=1">
+        <meta NAME=”ROBOTS” CONTENT=”NOINDEX,NOFOLLOW,NOARCHIVE”>
+        <link rel="stylesheet" type="text/css" href="./assets/css/index.css">
+    </head>
+    <body>
+        <!-- <input type="file" id="selmulti" multiple> -->
+        <form name="form1" id="id_form1" action="">
+            <div class="color-wrap"><p class="sharp">#</p><input type="text" placeholder="ffffff" id="color" size="30" maxlength="20"></div>
+            <label for="file">
+                写真を選択してください
+                <input type="file" name="file" id="file" multiple>
+            </label>
+            <p class="caution">※複数枚選択する場合は、通し番号が小さい順に選択して下さい</p>
+        </form>
+        <!-- <div class="upload">ファイルを選択して下さい<input type="file" name="file" id="file" multiple></div> -->
+        <div id="result"></div>
+        <canvas id="canvas1"></canvas>
+
+    </body>
+    <script>
+        var file = document.getElementById('file');
+        var canvas;
+        var canvasWidth = 400;
+        var canvasHeight = 300;
+        var uploadImgSrc;
+        var ctx;
+
+        var flg = true;
+
+        var fileSize = null;
+        var index = 0;
+
+        var imageWidths = [];
+        var imageHeights = [];
+        var fileNames = [];
+        var images = [];
+
+        var fileData;
+
+        var madeCount = 0;
+
+        function loadLocalImage(e) {
+            // ファイル情報を取得
+            // console.log('files', e.target.files); // 複数のオブジェクト
+
+            // imageSize().then(main())
+
+            // imageSize(e);
+            for(i=0; i < e.target.files.length; i++) {
+                reset = document.getElementById('result');
+                while (reset.firstChild) reset.removeChild(reset.firstChild);
+
+                flg = true;
+                fileNames.push(e.target.files[i].name);
+                console.log('fileNames', fileNames);
+                ready(i, e.target.files[i]).then(go(fileData));
+            }
+
+            setTimeout(() => {
+                flg = false;
+                for(i=0; i < e.target.files.length; i++) {
+                    ready(i, e.target.files[i]).then(go(fileData));
+                }
+            }, 2000);
+        }
+
+        function ready(i,file) {
+            return new Promise((resolve,reject) => {
+                index = i;
+                // console.log('index 01', index);
+                fileData = file;
+
+                // 画像ファイル以外は処理を止める
+                if(!fileData.type.match('image.*')) {
+                    alert('画像を選択してください');
+                    return;
+                }
+            })
+        }
+
+        function go(fileData) {
+            return new Promise((resolve,reject) => {
+                // FileReaderオブジェクトを使ってファイル読み込み
+                var reader = new FileReader();
+                // ファイル読み込みに成功したときの処理
+                reader.onload = () => {
+                    // console.log('index 02', index);
+                    
+                    getSize(reader).then(render(reader));
+                    // render(render);
+                    
+                }
+                // ファイル読み込みを実行
+                reader.readAsDataURL(fileData);
+            })
+        }
+
+        function getSize(reader) {
+            return new Promise((resolve,reject) => {
+                image = new Image();
+                image.src = reader.result;
+                image.onload = () => {
+                    // console.log('getSize func');
+                    fileSize = {width: image.naturalWidth, height: image.naturalHeight};
+                    if (flg) {
+                        imageWidths.push(fileSize.width);
+                        imageHeights.push(fileSize.height);
+                    }
+                }
+            })
+        }
+
+        function render(reader) {
+            return new Promise((resolve,reject) => {
+                // const name = 'canvas' + (index + 1 + '');
+                // console.log("name", name);
+                // console.log('index 03', index);
+                // console.log("fileSize02", fileSize);
+                canvas = document.getElementById('canvas1');
+                if (!flg) {
+                    if (fileSize.width < 1000) {
+                        canvasWidth = imageWidths[index];
+                        canvasHeight = imageHeights[index];
+                    } else {
+                        canvasWidth = 1000;
+                        canvasHeight = Math.round(canvasWidth * (imageHeights[index] / imageWidths[index]));
+                    }
+                }
+                
+                canvas.width = canvasWidth;
+                canvas.height = canvasHeight;
+                ctx = canvas.getContext('2d');
+                
+                // Canvas上に表示する
+                uploadImgSrc = reader.result;
+                canvasDraw(uploadImgSrc);
+            })
+        }
+
+        // ファイルが指定された時にloadLocalImage()を実行
+        file.addEventListener('change', loadLocalImage, false);
+
+        // Canvas上に画像を表示する
+        function canvasDraw(uploadImgSrc) {
+            // canvas内の要素をクリアする
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+            // Canvas上に画像を表示
+            var img = new Image();
+            img.src = uploadImgSrc;
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0, canvasWidth, this.height * (canvasWidth / this.width));
+
+                // Canvas上にテキストを表示
+                addText();
+
+                // canvasを画像に変換
+                var data = canvas.toDataURL();
+
+                // ダウンロードリンクを生成して出力
+                var dlLink = document.createElement('a');
+                dlLink.href = data;
+                dlLink.download = fileNames[madeCount] + '.jpg';
+                dlLink.innerText = fileNames[madeCount];
+                elementName = 'result' + index;
+                // console.log('index', index);
+                if (!flg) {
+                    document.getElementById('result').appendChild(dlLink);
+                    madeCount += 1;
+                }
+            }
+        }
+
+        // Canvas上にテキストを表示する
+        function addText() {
+            // ctx.fillStyle = '#000000';
+            // ctx.fillRect(10, 10, 140, 30);
+
+            var color = document.forms.id_form1.color.value;
+            if (color === '') {
+                color = '#fff';
+            } else {
+                color = '#' + color;
+            }
+
+            console.log('color', color);
+
+            // const color = '#fff';
+
+            const fontSize = (canvasWidth / 10);
+            const fontSizeText = fontSize + 'px';
+
+            var sizeText = 'making now';
+            var fileText = '';
+            if(!flg) {
+                sizeText = canvasWidth + ' * ' + canvasHeight;
+                fileText = fileNames[madeCount];
+            }
+
+            const left = canvas.width / 2;
+            const right = canvas.height / 2;
+            const offset = 0.8 * fontSize;
+
+            ctx.font = `bold ${fontSizeText} 'MS Pゴシック'`;
+            // ctx.font = `bold 20px 'MS Pゴシック'`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = color;
+            ctx.fillText(fileText, left, right - offset);
+            ctx.fillText(sizeText, left, right + offset);
+        }
+
+    </script>
+</html>
