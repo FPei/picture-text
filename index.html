@@ -145,21 +145,25 @@
 
         // Canvas上に画像を表示する
         function canvasDraw(uploadImgSrc, file) {
-            // canvas内の要素をクリアする
-            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
             // Canvas上に画像を表示
             var img = new Image();
             img.src = uploadImgSrc;
             img.onload = function() {
-                ctx.drawImage(img, 0, 0, canvasWidth, this.height * (canvasWidth / this.width));
+                canvas = document.getElementById('canvas1');
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                ctx = canvas.getContext('2d');
+                // canvas内の要素をクリアする
+                ctx.clearRect(0, 0, img.naturalWidth, img.naturalHeight);
+                ctx.drawImage(img, 0, 0, img.naturalWidth, this.height * (img.naturalWidth / this.width));
 
-                var imageSize = {width: image.naturalWidth, height: image.naturalHeight};
+                var imageSize = {width: img.naturalWidth, height: img.naturalHeight};
                 console.log('imageSize', imageSize);
                 console.log('file', file);
 
                 // Canvas上にテキストを表示
-                addText(file);
+                addText(file, img.naturalWidth, img.naturalHeight);
 
                 // canvasを画像に変換
                 var data = canvas.toDataURL();
@@ -179,7 +183,7 @@
         }
 
         // Canvas上にテキストを表示する
-        function addText(file) {
+        function addText(file, width, height) {
             // ctx.fillStyle = '#000000';
             // ctx.fillRect(10, 10, 140, 30);
 
@@ -200,17 +204,15 @@
                 size = size + 'px';
             }
 
-            console.log('size', size);
-
             // const color = '#fff';
 
-            const fontSize = (canvasWidth / 10);
+            const fontSize = (width / 10);
             const fontSizeText = size;
 
             var sizeText = 'making now';
             var fileText = '';
             if(!flg) {
-                sizeText = canvasWidth + ' * ' + canvasHeight;
+                sizeText = width + ' * ' + height;
                 fileText = file.name;
             }
 
