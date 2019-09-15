@@ -9,7 +9,8 @@
     <body>
         <!-- <input type="file" id="selmulti" multiple> -->
         <form name="form1" id="id_form1" action="">
-            <div class="color-wrap"><p class="sharp">#</p><input type="text" placeholder="ffffff" id="color" size="30" maxlength="20"></div>
+            <div class="color-wrap"><p class="sharp">文字色　# </p><input type="text" placeholder="ffffff" id="color" size="30" maxlength="20"></div>
+            <div class="color-wrap"><p class="sharp">文字サイズ</p><input type="text" placeholder="40" id="size" size="30" maxlength="20"><p class="sharp">px</p></div>
             <label for="file">
                 写真を選択してください
                 <input type="file" name="file" id="file" multiple>
@@ -187,12 +188,22 @@
                 color = '#' + color;
             }
 
-            console.log('color', color);
+            var size = document.forms.id_form1.size.value;
+            var sizeOffset;
+            if (size === '') {
+                sizeOffset = 40;
+                size = '40px'
+            } else {
+                sizeOffset = size;
+                size = size + 'px';
+            }
+
+            console.log('size', size);
 
             // const color = '#fff';
 
             const fontSize = (canvasWidth / 10);
-            const fontSizeText = fontSize + 'px';
+            const fontSizeText = size;
 
             var sizeText = 'making now';
             var fileText = '';
@@ -203,9 +214,9 @@
 
             const left = canvas.width / 2;
             const right = canvas.height / 2;
-            const offset = 0.8 * fontSize;
+            const offset = sizeOffset;
 
-            ctx.font = `bold ${fontSizeText} 'MS Pゴシック'`;
+            ctx.font = `${fontSizeText} 'MS Pゴシック'`;
             // ctx.font = `bold 20px 'MS Pゴシック'`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';

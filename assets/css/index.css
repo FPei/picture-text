@@ -1,7 +1,10 @@
+body {
+    font-family: 'Avenir','Helvetica Neue','Helvetica','Arial','Hiragino Sans','ヒラギノ角ゴシック',YuGothic,'Yu Gothic','メイリオ', Meiryo,'ＭＳ Ｐゴシック','MS PGothic'  
+    }
 #file {
     display: none;
 }
-#color {
+#color, #size {
     /* border: 1px solid #444; */
     padding: 10px;
     margin: 0 5px;
@@ -30,7 +33,7 @@ label:hover {
     display: inline;
 }
 #color::placeholder {
-    color: #444444;
+    color: #888888;
     letter-spacing: 2px;
     font-size: 14px;
 }
