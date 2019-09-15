@@ -40,8 +40,6 @@
         var fileNames = [];
         var images = [];
 
-        var fileData;
-
         var madeCount = 0;
 
         function loadLocalImage(e) {
@@ -58,13 +56,13 @@
                 flg = true;
                 fileNames.push(e.target.files[i].name);
                 console.log('fileNames', fileNames);
-                ready(i, e.target.files[i]).then(go(fileData));
+                ready(i, e.target.files[i]).then(go(e.target.files[i]));
             }
 
             setTimeout(() => {
                 flg = false;
                 for(i=0; i < e.target.files.length; i++) {
-                    ready(i, e.target.files[i]).then(go(fileData));
+                    ready(i, e.target.files[i]).then(go(e.target.files[i]));
                 }
             }, 2000);
         }
@@ -73,17 +71,17 @@
             return new Promise((resolve,reject) => {
                 index = i;
                 // console.log('index 01', index);
-                fileData = file;
+                // fileData = file;
 
                 // 画像ファイル以外は処理を止める
-                if(!fileData.type.match('image.*')) {
+                if(!file.type.match('image.*')) {
                     alert('画像を選択してください');
                     return;
                 }
             })
         }
 
-        function go(fileData) {
+        function go(file) {
             return new Promise((resolve,reject) => {
                 // FileReaderオブジェクトを使ってファイル読み込み
                 var reader = new FileReader();
@@ -91,12 +89,12 @@
                 reader.onload = () => {
                     // console.log('index 02', index);
                     
-                    getSize(reader).then(render(reader));
+                    getSize(reader).then(render(reader, file));
                     // render(render);
                     
                 }
                 // ファイル読み込みを実行
-                reader.readAsDataURL(fileData);
+                reader.readAsDataURL(file);
             })
         }
 
@@ -115,7 +113,7 @@
             })
         }
 
-        function render(reader) {
+        function render(reader, file) {
             return new Promise((resolve,reject) => {
                 // const name = 'canvas' + (index + 1 + '');
                 // console.log("name", name);
@@ -138,7 +136,7 @@
                 
                 // Canvas上に表示する
                 uploadImgSrc = reader.result;
-                canvasDraw(uploadImgSrc);
+                canvasDraw(uploadImgSrc, file);
             })
         }
 
@@ -146,7 +144,7 @@
         file.addEventListener('change', loadLocalImage, false);
 
         // Canvas上に画像を表示する
-        function canvasDraw(uploadImgSrc) {
+        function canvasDraw(uploadImgSrc, file) {
             // canvas内の要素をクリアする
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
@@ -156,8 +154,12 @@
             img.onload = function() {
                 ctx.drawImage(img, 0, 0, canvasWidth, this.height * (canvasWidth / this.width));
 
+                var imageSize = {width: image.naturalWidth, height: image.naturalHeight};
+                console.log('imageSize', imageSize);
+                console.log('file', file);
+
                 // Canvas上にテキストを表示
-                addText();
+                addText(file);
 
                 // canvasを画像に変換
                 var data = canvas.toDataURL();
@@ -165,8 +167,8 @@
                 // ダウンロードリンクを生成して出力
                 var dlLink = document.createElement('a');
                 dlLink.href = data;
-                dlLink.download = fileNames[madeCount] + '.jpg';
-                dlLink.innerText = fileNames[madeCount];
+                dlLink.download = file.name + '.jpg';
+                dlLink.innerText = file.name;
                 elementName = 'result' + index;
                 // console.log('index', index);
                 if (!flg) {
@@ -177,7 +179,7 @@
         }
 
         // Canvas上にテキストを表示する
-        function addText() {
+        function addText(file) {
             // ctx.fillStyle = '#000000';
             // ctx.fillRect(10, 10, 140, 30);
 
@@ -209,7 +211,7 @@
             var fileText = '';
             if(!flg) {
                 sizeText = canvasWidth + ' * ' + canvasHeight;
-                fileText = fileNames[madeCount];
+                fileText = file.name;
             }
 
             const left = canvas.width / 2;
