@@ -15,7 +15,9 @@
                 写真を選択してください
                 <input type="file" name="file" id="file" multiple>
             </label>
-            <p class="caution">※複数枚選択する場合は、通し番号が小さい順に選択して下さい</p>
+            <p class="caution">↓ 何かおかしい時は、リロードしてください</p>
+            <input id="reload" type="button" value="リロード" onclick="window.location.reload();" />
+            <!-- <p class="caution">※複数枚選択する場合は、通し番号が小さい順に選択して下さい</p> -->
         </form>
         <!-- <div class="upload">ファイルを選択して下さい<input type="file" name="file" id="file" multiple></div> -->
         <div id="result"></div>
@@ -64,7 +66,7 @@
                 for(i=0; i < e.target.files.length; i++) {
                     ready(i, e.target.files[i]).then(go(e.target.files[i]));
                 }
-            }, 2000);
+            }, 1000);
         }
 
         function ready(i,file) {
@@ -200,7 +202,7 @@
                 sizeOffset = 40;
                 size = '40px'
             } else {
-                sizeOffset = size;
+                sizeOffset = parseInt(size, 10);
                 size = size + 'px';
             }
 
@@ -217,16 +219,20 @@
             }
 
             const left = canvas.width / 2;
-            const right = canvas.height / 2;
-            const offset = sizeOffset;
+            const top = canvas.height / 2;
+            const offset = sizeOffset * 1.0;
+            const above = top - offset;
+            const under = top + offset;
+
+            console.log('under', under);
 
             ctx.font = `${fontSizeText} 'MS Pゴシック'`;
             // ctx.font = `bold 20px 'MS Pゴシック'`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillStyle = color;
-            ctx.fillText(fileText, left, right - offset);
-            ctx.fillText(sizeText, left, right + offset);
+            ctx.fillText(fileText, left, above);
+            ctx.fillText(sizeText, left, under);
         }
 
     </script>
